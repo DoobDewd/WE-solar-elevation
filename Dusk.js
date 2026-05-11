@@ -55,8 +55,8 @@ export function update(value) {
     const duskFullyVisible = -0.39 + sunsetOffset;
     const duskFadeOutBottom = -9.98 + sunsetOffset;
     let blend;
-    if (now > sunset || elevation <= duskFadeInTop) {
-        // Show dusk after sunset or when in dusk elevation range
+    if ((now > sunset || elevation <= duskFadeInTop) && now > 0.5) {
+        // Show dusk after sunset or during dusk elevation, but only after noon
         if (elevation > (duskFadeInTop - 2)) {
             blend = 0; // Above fade-in point, no dusk
         } else if (elevation >= duskFadeInBottom) {
