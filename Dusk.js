@@ -6,6 +6,7 @@ import * as WEMath from 'WEMath';
 let sun;
 let latitude = 45.52;
 let longitude = -122.68;
+let sunsetOffset = 0;
 let previousElevation = null;
 let lastLoggedSecond = -1;
 
@@ -16,6 +17,7 @@ export function init() {
 export function applyUserProperties(changedProperties) {
     if (changedProperties.latitude !== undefined) latitude = changedProperties.latitude;
     if (changedProperties.longitude !== undefined) longitude = changedProperties.longitude;
+    if (changedProperties.sunsetoffset !== undefined) sunsetOffset = changedProperties.sunsetoffset;
     if (sun) sun.setLocation(new Vec3(latitude, longitude, 0));
 
     // Reset elevation tracking when location changes so jump-detection doesn't misfire
@@ -43,22 +45,26 @@ export function update(value) {
     // Handle day wrapping - only bump sunset if it crosses midnight
     if (sunset < now - 0.5) sunset += 1;
 
-    // Artistic dusk fade (only show after sunset):
-    // Fade in from 11° to 5.06° elevation (reaches 1.0)
-    // Fully visible from 5.06° to -0.39° elevation
-    // Fade out from -0.39° to -9.98° elevation
-    // Invisible below -9.98° elevation until next day
+    // Artistic dusk fade (only show after sunset, adjustable via sunsetOffset):
+    // Fade in from upper threshold to middle threshold (reaches 1.0)
+    // Fully visible between middle thresholds
+    // Fade out to lower threshold
+    // Invisible below lower threshold until next day
+    const duskFadeInTop = 11 + sunsetOffset;
+    const duskFadeInBottom = 5.06 + sunsetOffset;
+    const duskFullyVisible = -0.39 + sunsetOffset;
+    const duskFadeOutBottom = -9.98 + sunsetOffset;
     let blend;
-    if (now > sunset || elevation <= 11) {
+    if (now > sunset || elevation <= duskFadeInTop) {
         // Show dusk after sunset or when in dusk elevation range
-        if (elevation > 9) {
+        if (elevation > (duskFadeInTop - 2)) {
             blend = 0; // Above fade-in point, no dusk
-        } else if (elevation >= 5.06) {
-            blend = 1.0 - WEMath.smoothStep(5.06, 11, elevation); // Fade in
-        } else if (elevation >= -0.39) {
+        } else if (elevation >= duskFadeInBottom) {
+            blend = 1.0 - WEMath.smoothStep(duskFadeInBottom, duskFadeInTop, elevation); // Fade in
+        } else if (elevation >= duskFullyVisible) {
             blend = 1.0; // Fully visible dusk
-        } else if (elevation >= -9.98) {
-            blend = WEMath.smoothStep(-9.98, -0.39, elevation); // Fade out
+        } else if (elevation >= duskFadeOutBottom) {
+            blend = WEMath.smoothStep(duskFadeOutBottom, duskFullyVisible, elevation); // Fade out
         } else {
             blend = 0; // Below fade-out point, stay at 0 until next day
         }

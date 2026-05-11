@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add *)",
+      "Bash(git commit -m 'Fix sunrise/sunset offset property keys to use lowercase *)",
+      "Bash(git push *)"
+    ]
+  }
+}

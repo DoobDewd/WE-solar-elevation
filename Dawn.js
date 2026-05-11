@@ -6,6 +6,7 @@ import * as WEMath from 'WEMath';
 let sun;
 let latitude = 45.52;
 let longitude = -122.68;
+let sunriseOffset = 0;
 let previousElevation = null;
 let lastLoggedSecond = -1;
 
@@ -16,6 +17,7 @@ export function init() {
 export function applyUserProperties(changedProperties) {
     if (changedProperties.latitude !== undefined) latitude = changedProperties.latitude;
     if (changedProperties.longitude !== undefined) longitude = changedProperties.longitude;
+    if (changedProperties.sunriseoffset !== undefined) sunriseOffset = changedProperties.sunriseoffset;
     if (sun) sun.setLocation(new Vec3(latitude, longitude, 0));
 
     // Reset elevation tracking when location changes so jump-detection doesn't misfire
@@ -37,16 +39,16 @@ export function update(value) {
     }
     previousElevation = elevation;
 
-    // Fade in from -6° (civil dawn) to 0° (sunrise)
-    // Stay at 1.0 until day is fully visible at +5°
-    // Then cut to 0 (only show in morning hours with dawn elevation, not at night)
+    // Fade in from civil dawn to sunrise (adjustable via sunriseOffset)
+    // Then cut to 0 once day is fully visible at +5°
+    const dawnStart = -6 + sunriseOffset;
     let blend;
-    if (elevation >= -6 && elevation <= 5 && now < 0.5) {
+    if (elevation >= dawnStart && elevation <= 5 && now < 0.5) {
         // Only display during morning hours to prevent false dawn displays at night
         if (elevation >= 5) {
             blend = 0; // Sharp cutoff once day reaches full brightness
         } else {
-            blend = WEMath.smoothStep(-6, 0, elevation);
+            blend = WEMath.smoothStep(dawnStart, 0, elevation);
         }
     } else {
         blend = 0; // Outside morning hours or wrong elevation, no dawn

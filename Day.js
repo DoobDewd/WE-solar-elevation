@@ -6,6 +6,7 @@ import * as WEMath from 'WEMath';
 let sun;
 let latitude = 45.52;
 let longitude = -122.68;
+let sunriseOffset = 0;
 let previousElevation = null;
 let lastLoggedSecond = -1;
 
@@ -16,6 +17,7 @@ export function init() {
 export function applyUserProperties(changedProperties) {
     if (changedProperties.latitude !== undefined) latitude = changedProperties.latitude;
     if (changedProperties.longitude !== undefined) longitude = changedProperties.longitude;
+    if (changedProperties.sunriseoffset !== undefined) sunriseOffset = changedProperties.sunriseoffset;
     if (sun) sun.setLocation(new Vec3(latitude, longitude, 0));
 
     // Reset elevation tracking when location changes so jump-detection doesn't misfire
@@ -37,9 +39,10 @@ export function update(value) {
     previousElevation = elevation;
 
     // Fade in from sunrise (0° elevation) to full brightness (5° elevation)
-    // Cut to 0 when dusk becomes fully visible (below -6° elevation)
+    // Cut to 0 when dusk becomes fully visible (adjustable via sunriseOffset)
+    const duskCutoff = -6 + sunriseOffset;
     let blend;
-    if (elevation < -6) {
+    if (elevation < duskCutoff) {
         blend = 0; // Dusk is fully visible, day is off
     } else {
         blend = WEMath.smoothStep(0, 5, elevation);
