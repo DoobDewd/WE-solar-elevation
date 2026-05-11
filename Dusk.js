@@ -29,9 +29,9 @@ export function update(value) {
     sun.setDateTime(new Date());
     const now = engine.timeOfDay;
     const sunPos = sun.getSunPosition();
-    let elevation = sunPos.y; // elevation is y component of Vec2
+    let elevation = sunPos.y;
 
-    // Ignore unnatural jumps (SunCalc wrap-around). Normal movement is ~0.1°, so 2.5° threshold catches wraps but smooths oscillations
+    // Ignore unnatural jumps in sun elevation calculations. Normal movement is ~0.1°, so 2.5° threshold catches anomalies
     if (previousElevation !== null && Math.abs(elevation - previousElevation) > 2.5) {
         elevation = previousElevation;
     }
@@ -44,10 +44,10 @@ export function update(value) {
     if (sunset < now - 0.5) sunset += 1;
 
     // Artistic dusk fade (only show after sunset):
-    // Fade in from 9° to 3.06° (reaches 1.0)
-    // Stay at 1.0 from 3.06° to -0.39°
-    // Fade out from -0.39° to -9.98°
-    // Stay at 0 below -9.98° until next day
+    // Fade in from 11° to 5.06° elevation (reaches 1.0)
+    // Fully visible from 5.06° to -0.39° elevation
+    // Fade out from -0.39° to -9.98° elevation
+    // Invisible below -9.98° elevation until next day
     let blend;
     if (now > sunset || elevation <= 11) {
         // Show dusk after sunset or when in dusk elevation range

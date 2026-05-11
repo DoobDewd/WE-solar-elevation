@@ -29,9 +29,9 @@ export function update(value) {
     sun.setDateTime(new Date());
     const now = engine.timeOfDay;
     const sunPos = sun.getSunPosition();
-    let elevation = sunPos.y; // elevation is y component of Vec2
+    let elevation = sunPos.y;
 
-    // Ignore unnatural jumps (SunCalc wrap-around). Normal movement is ~0.1°, so 2.5° threshold catches wraps but smooths oscillations
+    // Ignore unnatural jumps in sun elevation calculations. Normal movement is ~0.1°, so 2.5° threshold catches anomalies
     if (previousElevation !== null && Math.abs(elevation - previousElevation) > 2.5) {
         elevation = previousElevation;
     }
@@ -42,7 +42,7 @@ export function update(value) {
     // Then cut to 0 (only show in morning hours with dawn elevation, not at night)
     let blend;
     if (elevation >= -6 && elevation <= 5 && now < 0.5) {
-        // Show dawn only if dawn elevation AND morning hours (avoids day wrapping issues)
+        // Only display during morning hours to prevent false dawn displays at night
         if (elevation >= 5) {
             blend = 0; // Sharp cutoff once day reaches full brightness
         } else {

@@ -28,17 +28,16 @@ export function update(value) {
     }
     sun.setDateTime(new Date());
     const sunPos = sun.getSunPosition();
-    let elevation = sunPos.y; // elevation is y component of Vec2
+    let elevation = sunPos.y;
 
-    // Ignore unnatural jumps (SunCalc wrap-around). Normal movement is ~0.1°, so 2.5° threshold catches wraps but smooths oscillations
+    // Ignore unnatural jumps in sun elevation calculations. Normal movement is ~0.1°, so 2.5° threshold catches anomalies
     if (previousElevation !== null && Math.abs(elevation - previousElevation) > 2.5) {
         elevation = previousElevation;
     }
     previousElevation = elevation;
 
-    // Full brightness at 6:30am (~5° elevation)
-    // Fade in from 0° (sunrise) to 5°, stay at 1.0 above that
-    // Cut to 0 once dusk is fully visible (-6°)
+    // Fade in from sunrise (0° elevation) to full brightness (5° elevation)
+    // Cut to 0 when dusk becomes fully visible (below -6° elevation)
     let blend;
     if (elevation < -6) {
         blend = 0; // Dusk is fully visible, day is off
