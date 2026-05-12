@@ -52,8 +52,8 @@ export function update(value) {
     // Invisible below lower threshold until next day
     const duskFadeInTop = 11 + sunsetOffset;
     const duskFadeInBottom = 5.06 + sunsetOffset;
-    const duskFullyVisible = -0.39 + sunsetOffset;
-    const duskFadeOutBottom = -9.98 + sunsetOffset;
+    const duskFullyVisible = 2.61 + sunsetOffset;
+    const duskFadeOutBottom = -6.98 + sunsetOffset;
     let blend;
     if ((now > sunset || elevation <= duskFadeInTop) && now > 0.5) {
         // Show dusk after sunset or during dusk elevation, but only after noon
